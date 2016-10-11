@@ -154,7 +154,10 @@ class Homestead
 
 
     if settings.include? 'sites'
+      hosts = Array.new()
       settings["sites"].each do |site|
+        hosts.push(site["map"])
+
         type = site["type"] ||= "laravel"
 
         if (site.has_key?("hhvm") && site["hhvm"])
@@ -186,6 +189,17 @@ class Homestead
           end
         end
 
+      end
+
+      # Manage Hosts File With Host Manager Plugin
+      if Vagrant.has_plugin?('vagrant-hostmanager')
+        if hosts.any?
+          config.hostmanager.enabled           = true
+          config.hostmanager.manage_host       = true
+          config.hostmanager.ignore_private_ip = false
+          config.hostmanager.include_offline   = false
+          config.hostmanager.aliases           = hosts
+        end
       end
     end
 
